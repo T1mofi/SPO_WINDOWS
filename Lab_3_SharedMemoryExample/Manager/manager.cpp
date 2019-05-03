@@ -7,8 +7,8 @@
 
 using namespace std;
 
-vector<HANDLE> exitEvetnsVector;
-char EventID[30];
+vector<HANDLE> exitSemaphoresVector;
+char SemaphoreID[30];
 
 void createPr()
 {
@@ -18,14 +18,11 @@ void createPr()
 	stInfo.cb = sizeof(STARTUPINFO);
 	ZeroMemory(&prInfo, sizeof(prInfo));
 
-	sprintf_s(EventID, "%d", exitEvetnsVector.size() + 1);
-	exitEvetnsVector.push_back(CreateEvent(NULL,
-		FALSE,
-		FALSE,
-		EventID));
+	sprintf_s(SemaphoreID, "%d", exitSemaphoresVector.size() + 1);
+	exitSemaphoresVector.push_back(CreateSemaphore(NULL, 0, 1, SemaphoreID));
 
 	char commandLine[256];
-	sprintf_s(commandLine, "Child.exe %s", EventID);
+	sprintf_s(commandLine, "Child.exe %s", SemaphoreID);
 
 	if (!CreateProcess(NULL,
 		commandLine,
@@ -46,16 +43,16 @@ void createPr()
 
 void closePr()
 {
-	if (exitEvetnsVector.size() > 0) {
-		SetEvent(exitEvetnsVector.back());
-		CloseHandle(exitEvetnsVector.back());
-		exitEvetnsVector.pop_back();
+	if (exitSemaphoresVector.size() > 0) {
+		ReleaseSemaphore(exitSemaphoresVector.back(), 1, NULL);
+		CloseHandle(exitSemaphoresVector.back());
+		exitSemaphoresVector.pop_back();
 	}
 }
 
 void closeAllPr()
 {
-	while (exitEvetnsVector.size() > 0) {
+	while (exitSemaphoresVector.size() > 0) {
 		closePr();
 	}
 }

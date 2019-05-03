@@ -10,13 +10,13 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	char eventID[30];
-	strcpy(eventID, argv[1]);
-	HANDLE exitEvent = OpenEvent(EVENT_ALL_ACCESS, FALSE, eventID);
-
+	char semaphoreID[30];
+	strcpy(semaphoreID, argv[1]);
+	HANDLE close = OpenSemaphore(SEMAPHORE_ALL_ACCESS, FALSE, semaphoreID);
 
 	HANDLE print = OpenSemaphore(SEMAPHORE_ALL_ACCESS, FALSE, "Print");
 	HANDLE reset = OpenSemaphore(SEMAPHORE_ALL_ACCESS, FALSE, "Reset");
+	
 
 	HANDLE conn = OpenFileMapping(FILE_MAP_ALL_ACCESS,
 		FALSE,
@@ -45,16 +45,17 @@ int main(int argc, char* argv[])
 		ReleaseSemaphore(print, 1, NULL);
 		WaitForSingleObject(reset, INFINITE);
 
-		if (WaitForSingleObject(exitEvent, 0) == WAIT_OBJECT_0)
+		if (WaitForSingleObject(close, 0) == WAIT_OBJECT_0)
 		{
-			CloseHandle(exitEvent);
-			//system("cls");
+			CloseHandle(close);
+			UnmapViewOfFile(buff);
+			CloseHandle(conn);
+
 			return 0;
 		}
 	}
 
-	UnmapViewOfFile(buff);
-	CloseHandle(conn);
+	
 
 	return 0;
 }
