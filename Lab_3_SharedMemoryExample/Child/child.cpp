@@ -10,6 +10,10 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+	char eventID[30];
+	strcpy(eventID, argv[1]);
+	HANDLE exitEvent = OpenEvent(EVENT_ALL_ACCESS, FALSE, eventID);
+
 
 	HANDLE print = OpenSemaphore(SEMAPHORE_ALL_ACCESS, FALSE, "Print");
 	HANDLE reset = OpenSemaphore(SEMAPHORE_ALL_ACCESS, FALSE, "Reset");
@@ -30,7 +34,6 @@ int main(int argc, char* argv[])
 
 	while (true) {
 
-
 		for (int i = 0; i < 3; ++i)
 		{
 			CopyMemory((PVOID)buff, stri, 40);
@@ -41,6 +44,13 @@ int main(int argc, char* argv[])
 		CopyMemory((PVOID)buff, emptyString, 40);
 		ReleaseSemaphore(print, 1, NULL);
 		WaitForSingleObject(reset, INFINITE);
+
+		if (WaitForSingleObject(exitEvent, 0) == WAIT_OBJECT_0)
+		{
+			CloseHandle(exitEvent);
+			//system("cls");
+			return 0;
+		}
 	}
 
 	UnmapViewOfFile(buff);
