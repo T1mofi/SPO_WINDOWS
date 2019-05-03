@@ -29,24 +29,21 @@ int main(int argc, char* argv[])
 		40);
 
 	char emptyString[40] = "";
-	char * stri = (char*)calloc(40, 1);
-	stri = _itoa(GetCurrentProcessId(), stri, 10);
+	memset(emptyString, '\0', 40);
+
+	char * uniqueString = (char*)calloc(40, 1);
+	uniqueString = _itoa(GetCurrentProcessId(), uniqueString, 10);
 
 	while (true) {
 
-		for (int i = 0; i < 3; ++i)
-		{
-			CopyMemory((PVOID)buff, stri, 40);
-			ReleaseSemaphore(print, 1, NULL);
-			WaitForSingleObject(reset, INFINITE);
-		}
-
 		CopyMemory((PVOID)buff, emptyString, 40);
+		CopyMemory((PVOID)buff, uniqueString, 40);
 		ReleaseSemaphore(print, 1, NULL);
 		WaitForSingleObject(reset, INFINITE);
 
 		if (WaitForSingleObject(close, 0) == WAIT_OBJECT_0)
 		{
+			ReleaseSemaphore(reset, 1, NULL);
 			CloseHandle(close);
 			UnmapViewOfFile(buff);
 			CloseHandle(conn);
